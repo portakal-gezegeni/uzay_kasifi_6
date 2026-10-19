@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>6. Sınıf Uzay Kaşifi – Fen Oyunu</title>
+<style>
+:root{--bg:#020617;--card:rgba(15,23,42,.94);--tx:#f1f5f9;--ac:#22d3ee;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#020617;--card:rgba(15,23,42,.94);--tx:#f1f5f9;--ac:#22d3ee;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#020617;--card:rgba(15,23,42,.94);--tx:#f1f5f9;--ac:#22d3ee}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+#app{position:relative;height:100%;aspect-ratio:480/760;max-width:100%}
+canvas{width:100%;height:100%;display:block;touch-action:none}
+#ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:1em}
+.card{background:var(--card);border:2px solid var(--ac);border-radius:1.2em;padding:1.2em 1.3em;text-align:center;width:100%;max-width:26em;box-shadow:0 0 40px rgba(34,211,238,.25)}
+.card h1{margin:0 0 .3em;font-size:2em}.card p{margin:.4em 0;line-height:1.45}
+.big{font-size:1.1em}
+button.b{background:var(--ac);color:#04212a;border:0;border-radius:.8em;padding:.7em 1.6em;font:inherit;font-weight:800;font-size:1.15em;cursor:pointer;margin:.6em .2em}
+.sk{display:flex;gap:.5em;justify-content:center;margin:.5em 0}
+.sk button{width:3.6em;height:3.6em;border-radius:.8em;border:2px solid #334155;background:#0f172a;color:var(--tx);font-size:1.3em;cursor:pointer;line-height:1.1}
+.sk button.on{border-color:var(--ac);box-shadow:0 0 12px var(--ac)}.sk button:disabled{opacity:.5;font-size:.8em}
+small{color:#94a3b8}
+.chip{display:inline-block;background:#1e293b;border-radius:2em;padding:.15em .8em;font-size:.9em;margin-bottom:.4em}
+.miss{text-align:left;margin:.5em 0;font-size:.95em}
+#mu{position:absolute;right:.6em;bottom:.6em;z-index:5;width:2.6em;height:2.6em;border-radius:50%;border:2px solid #334155;background:rgba(15,23,42,.8);color:#fff;font-size:1.1em;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="app"><canvas id="c"></canvas><div id="ov"></div><button id="mu" title="Müzik">🔊</button></div>
+<script>
+/* YENİ SORU EKLEMEK İÇİN: Q dizisine [konu no, soru, doğru cevap, [3 yanlış], bilgi] ekle. */
+const TN=[["🪐","Güneş Sistemi","#312e81"],["🌑","Tutulmalar","#7c2d12"],["➡️","Bileşke Kuvvet","#581c87"],["⚖️","Denge ve Dengeleyici Kuvvet","#064e3b"],["🧭","Hız ve Sürat","#0c4a6e"],["📈","Sabit Süratli Hareket","#831843"]];
+const Q=[];
+/* SORU EKLEMEK İÇİN: NEW içine yeni satır ekle: konu no|soru|doğru|yanlış1|yanlış2|yanlış3|bilgi */
+const NEW=`0|Güneş sisteminin merkezinde ne vardır?|Güneş|Dünya|Jüpiter|Ay|Güneş sisteminin merkezinde Güneş vardır.
+0|Güneş’e en yakın gezegen hangisidir?|Merkür|Venüs|Mars|Dünya|Sıra: Merkür, Venüs, Dünya, Mars…
+0|Güneş’e en uzak gezegen hangisidir?|Neptün|Uranüs|Satürn|Jüpiter|Neptün en uzaktaki gezegendir.
+0|Güneş’e en yakın üçüncü gezegen hangisidir?|Dünya|Mars|Venüs|Merkür|Sıra: Merkür, Venüs, Dünya.
+0|Güneş sisteminde kaç gezegen vardır?|8|7|9|10|Güneş sisteminde 8 gezegen vardır.
+0|Dünya’dan sonra Güneş’ten uzaklaşırken gelen gezegen?|Mars|Venüs|Jüpiter|Satürn|Dünya’dan sonra Mars gelir.
+0|Hangisi kayalık (iç) gezegendir?|Mars|Jüpiter|Satürn|Neptün|Kayalık gezegenler: Merkür, Venüs, Dünya, Mars.
+0|Hangisi gazlı (dış) gezegendir?|Jüpiter|Merkür|Venüs|Dünya|Gazlı gezegenler: Jüpiter, Satürn, Uranüs, Neptün.
+0|Güneş sistemindeki en büyük gezegen hangisidir?|Jüpiter|Satürn|Dünya|Neptün|En büyük gezegen Jüpiter’dir.
+0|En belirgin halkalara sahip gezegen hangisidir?|Satürn|Mars|Venüs|Merkür|Satürn’ün halkaları en belirgin olanıdır.
+0|Gezegenler Güneş’in etrafında ne yapar?|Dolanır|Durur|Erir|Söner|Gezegenler Güneş’in etrafında dolanır.
+0|Gezegenlerin ışığı nereden gelir?|Güneş’ten yansır|Kendileri üretir|Ay’dan gelir|Yıldızlardan gelir|Gezegenler ışık üretmez, Güneş ışığını yansıtır.
+0|İç gezegenler hangileridir?|Merkür, Venüs, Dünya, Mars|Jüpiter, Satürn, Uranüs, Neptün|Dünya, Jüpiter, Satürn, Mars|Venüs, Mars, Jüpiter, Neptün|İç gezegenler küçük ve kayalıktır.
+0|Bir gezegenin etrafında dolanan gök cismine ne denir?|Uydu|Yıldız|Asteroit|Kuyruklu yıldız|Gezegen etrafında dolanan cisme uydu denir.
+0|Hangisi bir yıldızdır?|Güneş|Mars|Ay|Satürn|Güneş kendi ışığını üreten bir yıldızdır.
+0|Küçük kayalık gök cisimlerine ne denir?|Asteroit|Yıldız|Gezegen|Uydu|Asteroitler küçük kayalık gök cisimleridir.
+0|Hangisi gezegen değildir?|Ay|Mars|Venüs|Dünya|Ay, Dünya’nın uydusudur.
+1|Ay tutulması sırasında gök cisimlerinin sırası nasıldır?|Güneş – Dünya – Ay|Güneş – Ay – Dünya|Dünya – Güneş – Ay|Ay – Güneş – Dünya|Ay tutulmasında Dünya ortadadır.
+1|Güneş tutulması sırasında gök cisimlerinin sırası nasıldır?|Güneş – Ay – Dünya|Güneş – Dünya – Ay|Dünya – Güneş – Ay|Ay – Dünya – Güneş|Güneş tutulmasında Ay ortadadır.
+1|Ay tutulması hangi evrede olur?|Dolunay|Yeni Ay|İlk Dördün|Son Dördün|Ay tutulması dolunayda olur.
+1|Güneş tutulması hangi evrede olur?|Yeni Ay|Dolunay|İlk Dördün|Son Dördün|Güneş tutulması yeni ayda olur.
+1|Ay tutulmasında Ay’a ne düşer?|Dünya’nın gölgesi|Güneş’in gölgesi|Mars’ın gölgesi|Işık|Ay, Dünya’nın gölgesine girer.
+1|Güneş tutulmasında Dünya’ya ne düşer?|Ay’ın gölgesi|Dünya’nın gölgesi|Güneş’in gölgesi|Mars’ın gölgesi|Ay’ın gölgesi Dünya’nın bir kısmına düşer.
+1|Güneş tutulmasında Ay nerededir?|Güneş ile Dünya arasında|Dünya’nın arkasında|Güneş’in arkasında|Mars’ın yanında|Ay, Güneş’i kapatacak şekilde ortadadır.
+1|Ay tutulmasında Dünya nerededir?|Güneş ile Ay arasında|Ay’ın arkasında|Güneş’in arkasında|Mars’ın yanında|Dünya, Güneş ile Ay’ın arasındadır.
+1|Tutulmalar neden oluşur?|Gölge oluşması nedeniyle|Güneş’in sönmesiyle|Bulutlar yüzünden|Cisimlerin erimesiyle|Tutulmalar bir gölge olayıdır.
+1|Ay tutulmasını kimler görebilir?|Ay’ı görebilen, gecesi olan bölgedekiler|Yalnızca gündüz olanlar|Yalnızca kutuptakiler|Kimse göremez|Ay tutulması gecesi olan yerlerden izlenir.
+1|Güneş tutulması Dünya’nın her yerinden görülür mü?|Hayır, yalnızca Ay’ın gölgesi düşen yerlerden|Evet, her yerden|Yalnızca gece|Yalnızca kutuplardan|Ay’ın gölgesi Dünya’nın küçük bir kısmına düşer.
+1|Tutulmalar neden her ay olmaz?|Ay’ın yörüngesi eğiktir|Ay her ay kaybolur|Güneş uzaklaşır|Dünya durur|Ay’ın yörüngesi eğik olduğu için çoğu zaman hizalanma olmaz.
+1|Güneş tutulmasını güvenle izlemek için ne kullanılmalı?|Özel tutulma gözlüğü|Çıplak göz|Güneş gözlüğü|Dürbün|Güneş’e çıplak gözle bakmak göze zarar verir.
+1|Gölge oluşumunu sağlayan ışık özelliği hangisidir?|Işık doğrusal yayılır|Işık kırılır|Işığın rengi vardır|Işık çok hızlıdır|Işık doğrusal yayıldığı için engelin arkası gölge olur.
+1|Gölge oluşması için hangisi gerekir?|Işık kaynağı ve engel|Yalnızca ayna|Yalnızca ses|Su|Işık kaynağı, engel ve perde gerekir.
+1|Ay tutulması Ay’ın neyi demektir?|Dünya’nın gölgesine girmesi|Güneş’e çarpması|Dünya’ya düşmesi|Sönmesi|Ay, Dünya’nın gölgesine girince tutulur.
+1|Her dolunayda tutulma olur mu?|Hayır, her dolunayda olmaz|Evet, hep olur|Yalnızca yazın olur|Yalnızca kışın olur|Hizalanma gerekir; her dolunayda olmaz.
+2|Bileşke kuvvet nedir?|Birden fazla kuvvetin yerine geçen tek kuvvet|Kuvvet ölçen alet|Kuvvetin birimi|Bir itme çeşidi|Bileşke, kuvvetlerin yerine geçen tek kuvvettir.
+2|Aynı yönlü 5 N ve 7 N kuvvetin bileşkesi kaçtır?|12 N|2 N|35 N|7 N|Aynı yönlü kuvvetler toplanır.
+2|Zıt yönlü 8 N ve 5 N kuvvetin bileşkesi kaçtır?|3 N|13 N|40 N|5 N|Zıt yönlü kuvvetlerde büyükten küçük çıkarılır.
+2|Zıt yönlü 8 N ve 5 N’nin bileşkesi hangi yöndedir?|8 N’luk kuvvetin yönünde|5 N’luk kuvvetin yönünde|Yönsüzdür|Rastgeledir|Bileşke büyük kuvvetin yönündedir.
+2|Aynı yönlü kuvvetlerin bileşkesi nasıl bulunur?|Toplanır|Çıkarılır|Çarpılır|Bölünür|Aynı yönde kuvvetler toplanır.
+2|Zıt yönlü kuvvetlerin bileşkesi nasıl bulunur?|Büyükten küçük çıkarılır|Toplanır|Çarpılır|Bölünür|Zıt yönde kuvvetler birbirini azaltır.
+2|Kuvvetin birimi hangisidir?|Newton (N)|Kilogram|Metre|Saniye|Kuvvet newton ile ölçülür.
+2|Kuvvet hangi aletle ölçülür?|Dinamometre|Terazi|Cetvel|Termometre|Kuvveti dinamometre ölçer.
+2|Kuvvetin özellikleri hangileridir?|Büyüklük, yön, doğrultu, uygulama noktası|Renk ve tat|Sıcaklık ve yoğunluk|Hacim ve kütle|Kuvvetin büyüklüğü, yönü, doğrultusu ve uygulama noktası vardır.
+2|Sağa 10 N, sola 4 N kuvvet uygulanıyor. Bileşke nedir?|6 N sağa|14 N sağa|6 N sola|14 N sola|10 − 4 = 6 N, büyük kuvvetin yönünde.
+2|Sağa 6 N ve 9 N, sola 3 N uygulanıyor. Bileşke nedir?|12 N sağa|18 N sağa|6 N sola|0 N|6 + 9 = 15, 15 − 3 = 12 N sağa.
+2|Kuvvet oklarla gösterilirken okun uzunluğu neyi gösterir?|Büyüklüğünü|Rengini|Yönünü|Kütlesini|Ok ne kadar uzunsa kuvvet o kadar büyüktür.
+2|Kuvveti gösteren okun ucu neyi belirtir?|Yönünü|Büyüklüğünü|Rengini|Hızını|Okun ucu kuvvetin yönünü gösterir.
+2|İki kişi bir kutuyu aynı yönde 20 N ve 30 N ile itiyor. Bileşke nedir?|50 N|10 N|600 N|25 N|Aynı yönlü kuvvetler toplanır.
+2|Halat çekmede 300 N ve 250 N zıt yönlü çekiliyor. Kim kazanır?|300 N’luk takım|250 N’luk takım|Berabere kalır|Hiçbiri|Bileşke 50 N ve 300 N’luk takımın yönündedir.
+2|Eşit büyüklükte zıt yönlü kuvvetlerin bileşkesi nedir?|0 N|Toplamları|İki katı|Büyük olanı|Eşit zıt kuvvetler birbirini dengeler.
+2|Aynı yönde 3 N ve 4 N kuvvet uygulanırsa bileşke kaçtır?|7 N|1 N|12 N|3 N|3 + 4 = 7 N.
+3|Bileşke kuvvet sıfırsa kuvvetler nasıldır?|Dengelenmiştir|Dengelenmemiştir|Yoktur|Artmıştır|Bileşke 0 ise kuvvetler dengelenmiştir.
+3|Dengelenmiş kuvvetlerin etkisindeki durgun cisim ne yapar?|Durmaya devam eder|Hareket eder|Hızlanır|Uçar|Dengelenmiş kuvvetlerde durgun cisim durur.
+3|Dengelenmiş kuvvetlerin etkisindeki hareketli cisim ne yapar?|Sabit süratle aynı yönde gider|Durur|Yön değiştirir|Hızlanır|Hareketli cisim sabit süratle gitmeye devam eder.
+3|Dengelenmemiş kuvvet cismin neyini değiştirebilir?|Hareket durumunu|Kütlesini|Rengini|Maddesini|Hız ya da yön değişir.
+3|Hangisinde kuvvetler dengelenmemiştir?|Yavaşlayan otobüs|Yerde duran kitap|Sabit süratle giden araba|Asılı duran lamba|Yavaşlama, dengelenmemiş kuvvet demektir.
+3|Hangisinde kuvvetler dengelenmiştir?|Yerde duran kitap|Hızlanan araba|Fren yapan araba|Yön değiştiren top|Duran kitapta kuvvetler dengelenmiştir.
+3|Dengeleyici kuvvet nedir?|Bileşkeyle eşit büyüklükte, zıt yönlü kuvvet|Bileşkeyle aynı yönlü kuvvet|Bileşkenin iki katı|Sıfır kuvvet|Dengeleyici, bileşkeyi sıfırlar.
+3|Bileşke 10 N doğuya ise dengeleyici kuvvet nedir?|10 N batıya|10 N doğuya|20 N batıya|5 N batıya|Eşit büyüklükte ve zıt yönlüdür.
+3|Dengelenmemiş kuvvetleri dengelemek için ne uygulanır?|Dengeleyici kuvvet|Isı|Işık|Hiçbir şey|Dengeleyici kuvvet bileşkeyi sıfırlar.
+3|6 N sağa ve 6 N sola kuvvet uygulanan durgun cisme ne olur?|Durmaya devam eder|Sağa gider|Sola gider|Yukarı çıkar|Bileşke 0 olduğu için durur.
+3|Hızlanan bir araçta kuvvetler nasıldır?|Dengelenmemiştir|Dengelenmiştir|Yoktur|Sıfırdır|Hız değişiyorsa kuvvetler dengelenmemiştir.
+3|Sabit süratle düşen paraşütçüde kuvvetler nasıldır?|Dengelenmiştir|Dengelenmemiştir|Yoktur|Hep artar|Sürat sabitse kuvvetler dengelenmiştir.
+3|Masadaki kitabın ağırlığını ne dengeler?|Masanın yukarı doğru uyguladığı kuvvet|Hava|Işık|Hiçbir şey|Masa, kitaba yukarı kuvvet uygular.
+3|12 N sağa, 5 N sola etki var. Dengeleyici kuvvet nedir?|7 N sola|7 N sağa|17 N sola|5 N sağa|Bileşke 7 N sağa, dengeleyici 7 N sola.
+3|Kuvvetler dengelenmemişse bileşke nasıldır?|Sıfırdan farklıdır|Sıfırdır|Yoktur|Eksidir|Dengelenmemiş kuvvette bileşke sıfır değildir.
+3|Halat çekmede iki takım eşit kuvvetle çekiyorsa halat ne yapar?|Hareket etmez|Sağa gider|Sola gider|Kopar|Eşit zıt kuvvetler dengelenir.
+3|Durgun bir cismi hareket ettirmek için kuvvetler nasıl olmalıdır?|Dengelenmemiş|Dengelenmiş|Sıfır|Eşit ve zıt|Hareket başlatmak için bileşke sıfırdan farklı olmalıdır.
+4|Sürat neye göre hesaplanır?|Alınan yola|Yer değiştirmeye|Kütleye|Hacme|Sürat = alınan yol ÷ zaman.
+4|Hız neye göre hesaplanır?|Yer değiştirmeye|Alınan yola|Kütleye|Hacme|Hız = yer değiştirme ÷ zaman.
+4|Hız ile sürat arasındaki fark nedir?|Hızın yönü vardır|Sürat yönlüdür|Aralarında fark yoktur|Hızın birimi yoktur|Hız yönlü, sürat yönsüzdür.
+4|Sürat formülü hangisidir?|Yol ÷ zaman|Yol × zaman|Zaman ÷ yol|Yol + zaman|Sürat = yol ÷ zaman.
+4|240 km yolu 3 saatte giden aracın sürati nedir?|80 km/sa|720 km/sa|60 km/sa|243 km/sa|240 ÷ 3 = 80 km/sa.
+4|Sürat birimi hangisidir?|m/s|kg|N|L|Sürat birimi m/s ya da km/sa’tir.
+4|1 m/s kaç km/sa’tir?|3,6|36|0,36|60|1 m/s = 3,6 km/sa.
+4|72 km/sa kaç m/s’dir?|20|72|200|7,2|72 ÷ 3,6 = 20 m/s.
+4|Hangisi bir hız örneğidir?|30 m/s batıya|30 m/s|30 m|30 s|Hız yön içerir.
+4|Hangisi bir sürat örneğidir?|50 km/sa|50 km/sa doğuya|50 km doğuya|50 sa|Sürat yön içermez.
+4|Yer değiştirme nedir?|Başlangıçtan bitişe yönlü düz uzaklık|Gidilen toplam yol|Geçen zaman|Kütle|Yer değiştirme yönlüdür.
+4|Alınan yol nedir?|Gidilen yolun toplam uzunluğu|Yönlü düz uzaklık|Hız|Kuvvet|Alınan yol yönsüzdür.
+4|Pistte tam tur koşan çocuğun yer değiştirmesi nedir?|0|Pist uzunluğu|Yarıçapı|Sonsuz|Başladığı yere döndüğü için 0’dır.
+4|Yönü değişen ama sürati sabit olan cismin hızı?|Değişir|Değişmez|Sıfırdır|Sürat artar|Yön değişince hız değişir.
+4|20 m/s süratle 5 saniye giden cismin aldığı yol?|100 m|4 m|25 m|15 m|20 × 5 = 100 m.
+4|Hangisi daha süratlidir?|90 km/sa|20 m/s|60 km/sa|10 m/s|20 m/s = 72 km/sa; 90 km/sa daha büyüktür.
+5|Sabit süratli hareket nedir?|Eşit zamanda eşit yol alma|Hızlanma|Yavaşlama|Durma|Eşit sürelerde eşit yol alınır.
+5|4 m/s sabit süratle giden cisim 3 saniyede kaç m yol alır?|12 m|7 m|1,3 m|43 m|4 × 3 = 12 m.
+5|Sabit süratte yol formülü hangisidir?|Yol = sürat × zaman|Yol = sürat ÷ zaman|Yol = sürat + zaman|Yol = sürat − zaman|Yol = sürat × zaman.
+5|Sabit süratte zaman formülü hangisidir?|Zaman = yol ÷ sürat|Zaman = yol × sürat|Zaman = sürat ÷ yol|Zaman = yol − sürat|Zaman = yol ÷ sürat.
+5|5 m/s ile 10 saniyede alınan yol kaç m’dir?|50 m|15 m|2 m|0,5 m|5 × 10 = 50 m.
+5|30 m yolu 6 saniyede alan cismin sürati nedir?|5 m/s|36 m/s|180 m/s|0,2 m/s|30 ÷ 6 = 5 m/s.
+5|100 m yolu 20 m/s ile kaç saniyede alır?|5 s|2000 s|80 s|120 s|100 ÷ 20 = 5 s.
+5|Tabloda 2 s→10 m, 4 s→20 m, 6 s→30 m. Sürat kaçtır?|5 m/s|10 m/s|20 m/s|2 m/s|10 ÷ 2 = 5 m/s.
+5|Sabit süratle giden bir araç 90 km’yi 1,5 saatte alıyor. Sürati nedir?|60 km/sa|135 km/sa|90 km/sa|45 km/sa|90 ÷ 1,5 = 60 km/sa.
+5|Sabit süratli cisim 5 saniyede 45 m alıyor. 10 saniyede kaç m alır?|90 m|50 m|450 m|9 m|Süre iki katına çıkınca yol da iki katına çıkar.
+5|Sabit süratli harekette sürat zamanla nasıl değişir?|Değişmez|Artar|Azalır|Sıfır olur|Sürat her an aynıdır.
+5|Hangisi sabit süratli harekete örnektir?|Sabit süratle çalışan yürüyen merdiven|Serbest düşen elma|Fren yapan araba|Hızlanan bisiklet|Yürüyen merdiven sabit süratle hareket eder.
+5|3 saniyede 12 m alan cisim 9 saniyede kaç m alır?|36 m|24 m|18 m|27 m|12 ÷ 3 = 4 m/s, 4 × 9 = 36 m.
+5|Sabit süratli harekette geçen süre iki katına çıkarsa alınan yol ne olur?|İki katına çıkar|Aynı kalır|Yarıya düşer|Dört katına çıkar|Sabit süratte yol, zamanla aynı oranda artar.
+5|8 m/s süratle 1 dakikada alınan yol kaç m’dir?|480 m|8 m|60 m|4800 m|1 dakika = 60 s; 8 × 60 = 480 m.
+5|Eşit zamanlarda alınan yollar farklıysa hareket nasıldır?|Sabit süratli değildir|Sabit süratlidir|Durmuştur|Yoktur|Sabit sürat için eşit zamanda eşit yol gerekir.`;
+NEW.trim().split("\n").forEach(l=>{const a=l.split("|");Q.push([+a[0],a[1],a[2],[a[3],a[4],a[5]],a[6]])});
+const $=s=>document.querySelector(s),cv=$("#c"),cx=cv.getContext("2d"),W=480,H=760;cv.width=W;cv.height=H;
+const SK=["🚀","🛸","🪐","👽"],SKP=[0,150,400,800],LX=[90,240,390],LC=["#2563eb","#ea580c","#9333ea"];
+let S={};try{S=JSON.parse(localStorage.getItem("uzay6"))||{}}catch(e){}
+S.best=S.best||0;S.total=S.total||0;S.skin=S.skin||0;
+const save=()=>{try{localStorage.setItem("uzay6",JSON.stringify(S))}catch(e){}};
+let g=null,parts=[],keys={},tx=W/2,ty=H-80,mode="menu",ac;
+const stars=[...Array(70)].map(()=>({x:Math.random()*W,y:Math.random()*H,s:Math.random()*2+.5}));
+const sh=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+const beep=(f,d,t)=>{try{ac=ac||new AudioContext();const o=ac.createOscillator(),v=ac.createGain();o.type=t||"sine";o.frequency.value=f;v.gain.value=.07;o.connect(v);v.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}};
+const ov=h=>{$("#ov").innerHTML=h;$("#ov").style.display=h?"flex":"none"};
+const fit=()=>{$("#app").style.fontSize=$("#app").clientWidth/480*16+"px"};addEventListener("resize",fit);fit();
+
+function menu(){mode="menu";g=null;ov(`<div class="card"><h1>🚀 Uzay Kaşifi</h1><p><b>6. Sınıf Fen Bilimleri</b></p><p>Soruyu oku, <b>doğru cevabın gezegenine</b> uç!<br>Bir cevaba <b>dokun</b>, roket yukarı uçup o cevabı seçsin, sonra aşağı dönsün. Fareyle ya da sağ-sol ok tuşlarıyla da oynayabilirsin.</p><p>🪐 🌑 ➡️ ⚖️ 🧭 📈<br><small>50 doğru cevap ver, Uzay Kaşifi ol!<br>3 canın var, her 10 doğruda +1 can (en fazla 3).</small></p><button class="b" id="go">▶ Oyna</button><div class="sk">${SK.map((e,i)=>`<button data-i="${i}" class="${S.skin===i?"on":""}" ${S.total<SKP[i]?"disabled":""}>${S.total<SKP[i]?"🔒<br>"+SKP[i]:e}</button>`).join("")}</div><small>Roket seç · 🔒 toplam puanla açılır<br>En yüksek: ${S.best} · Toplam puan: ${S.total}</small></div>`);
+  $("#go").onclick=newGame;document.querySelectorAll(".sk button").forEach(b=>b.onclick=()=>{S.skin=+b.dataset.i;save();menu()})}
+function newGame(){g={score:0,hp:3,streak:0,ans:0,wrong:[0,0,0,0,0,0,0],q:sh(Q.map((_,i)=>i)),ok:0,cur:null,b:[],x:W/2,y:H-80,pause:false};tx=W/2;ty=H-80;nextQ();mode="play";ov("");startMusic();beep(520,.1)}
+function nextQ(){if(!g.q.length){win();return}g.cur=Q[g.q.pop()];
+  const o=sh([[g.cur[2],1],...sh(g.cur[3]).slice(0,2).map(t=>[t,0])]);g.b=o.map((a,i)=>({x:LX[i],y:190,t:a[0],ok:a[1],c:i}))}
+const burst=(x,y,c)=>{for(let i=0;i<18;i++)parts.push({x,y,vx:(Math.random()-.5)*320,vy:(Math.random()-.5)*320,l:.6,c})};
+function resolve(ok,late){g.tgt=null;ty=H-80;
+  if(ok){g.streak++;g.ans++;g.ok++;if(g.ok%10===0&&g.hp<3)g.hp++;const m=1+Math.floor(g.streak/3);g.score+=10*m;burst(g.x,g.y-20,"#4ade80");parts.push({x:g.x,y:g.y-50,vx:0,vy:-60,l:.9,t:"+"+10*m,c:"#fde047"});beep(660,.1);setTimeout(()=>beep(880,.14),90);if(g.ok>=50)win();else nextQ()}
+  else{g.hp--;g.streak=0;g.wrong[g.cur[0]]++;g.pause=true;g.b=[];burst(g.x,g.y-20,"#f87171");beep(150,.35,"sawtooth");
+    const t=TN[g.cur[0]];ov(`<div class="card"><span class="chip">${t[0]} ${t[1]}</span><h1>${late?"⏰ Geç kaldın!":"❌ Olmadı!"}</h1><p>${g.cur[1]}</p><p class="big">Doğru cevap: <b>${g.cur[2]}</b></p><p>💡 ${g.cur[4]}</p><p>${"❤️".repeat(Math.max(g.hp,0))||"💔"}</p><button class="b" id="nx">${g.hp>0?"Devam ▶":"Bitir"}</button></div>`);
+    $("#nx").onclick=()=>{ov("");if(g.hp<=0)end();else{g.ans++;nextQ();g.pause=false}}}}
+function win(){mode="over";g.b=[];const nb=g.score>S.best;if(nb)S.best=g.score;S.total+=g.score;save();beep(523,.15);setTimeout(()=>beep(659,.15),150);setTimeout(()=>beep(784,.35),300);
+  const wt=g.wrong.reduce((a,b)=>a+b,0),r=g.ok/(g.ok+wt),st=r>=.9?"⭐⭐⭐":r>=.7?"⭐⭐":"⭐",m=g.wrong.map((n,i)=>[n,i]).filter(x=>x[0]).sort((a,b)=>b[0]-a[0]).slice(0,3);
+  ov(`<div class="card"><h1>🎉 Tebrikler Uzay Kaşifi!</h1><p class="big"><b>Tüm konuları tamamladın!</b> 🚀</p><p style="font-size:1.8em;margin:.2em">${st}</p><p>Doğru: <b>${g.ok}</b> · Yanlış: <b>${wt}</b> · Puan: <b>${g.score}</b> ${nb?"🏆 Yeni rekor!":""}</p><div class="miss">${m.length?"<b>Biraz daha çalışırsan tam puan:</b><br>"+m.map(x=>`${TN[x[1]][0]} ${TN[x[1]][1]} (${x[0]} yanlış)`).join("<br>"):"🌟 Hiç yanlışın yok, mükemmel!"}</div><button class="b" id="again">Tekrar oyna</button><button class="b" id="mn" style="background:#334155;color:#fff">Menü</button></div>`);
+  $("#again").onclick=newGame;$("#mn").onclick=menu}
+function end(){mode="over";const nb=g.score>S.best;if(nb)S.best=g.score;S.total+=g.score;save();
+  const m=g.wrong.map((n,i)=>[n,i]).filter(x=>x[0]).sort((a,b)=>b[0]-a[0]).slice(0,3);
+  ov(`<div class="card"><h1>🌌 Oyun bitti</h1><p class="big">Puan: <b>${g.score}</b> ${nb?"🏆 Yeni rekor!":""}</p><p><small>En yüksek: ${S.best} · Doğru: ${g.ans}</small></p><div class="miss">${m.length?"<b>Biraz daha çalış:</b><br>"+m.map(x=>`${TN[x[1]][0]} ${TN[x[1]][1]} (${x[0]} yanlış)`).join("<br>"):"🎉 Hiç yanlışın yok!"}</div><button class="b" id="again">Tekrar oyna</button><button class="b" id="mn" style="background:#334155;color:#fff">Menü</button></div>`);
+  $("#again").onclick=newGame;$("#mn").onclick=menu}
+
+const setT=e=>{const r=cv.getBoundingClientRect();tx=(e.clientX-r.left)/r.width*W};cv.addEventListener("pointermove",setT);
+cv.addEventListener("pointerdown",e=>{setT(e);if(g&&mode==="play"&&!g.pause&&g.b.length){g.tgt=g.b.reduce((a,b)=>Math.abs(b.x-tx)<Math.abs(a.x-tx)?b:a)}});
+addEventListener("keydown",e=>keys[e.key.toLowerCase()]=1);addEventListener("keyup",e=>keys[e.key.toLowerCase()]=0);
+
+function wrap(t,x,y,mw,lh){const w=t.split(" ");let l="",ls=[];w.forEach(s=>{const n=l?l+" "+s:s;if(cx.measureText(n).width>mw&&l){ls.push(l);l=s}else l=n});ls.push(l);const y0=y-(ls.length-1)*lh/2;ls.forEach((s,i)=>cx.fillText(s,x,y0+i*lh))}
+function update(dt){
+  stars.forEach(s=>{s.y+=s.s*(mode==="play"&&!g.pause?60:20)*dt;if(s.y>H){s.y=0;s.x=Math.random()*W}});
+  parts.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.l-=dt});parts=parts.filter(p=>p.l>0);
+  if(mode!=="play"||g.pause)return;
+  if(keys.arrowleft||keys.a)tx-=420*dt;if(keys.arrowright||keys.d)tx+=420*dt;tx=Math.max(40,Math.min(W-40,tx));
+  if(g.tgt&&g.b.includes(g.tgt)){tx=g.tgt.x;ty=g.tgt.y}else{g.tgt=null;ty=H-80}
+  g.x+=(tx-g.x)*Math.min(1,dt*14);g.y+=(ty-g.y)*Math.min(1,dt*14);
+  if(Math.random()<.6)parts.push({x:g.x+(Math.random()-.5)*10,y:g.y+25,vx:(Math.random()-.5)*30,vy:130,l:.3,c:"#fb923c"});
+  const sp=Math.min(34+g.ans*.5,50);
+  for(const b of g.b){b.y+=sp*dt;if(Math.abs(b.x-g.x)<92&&Math.abs(b.y-g.y)<61){resolve(b.ok);return}}
+  if(g.b[0]&&g.b[0].y>H+45){if(g.b.some(b=>b.ok))resolve(false,true)}}
+function draw(){
+  const tc=g&&mode!=="menu"?TN[g.cur[0]][2]:"#1e1b4b",gr=cx.createLinearGradient(0,0,0,H);gr.addColorStop(0,tc);gr.addColorStop(1,"#020617");cx.fillStyle=gr;cx.fillRect(0,0,W,H);
+  cx.fillStyle="#fff";stars.forEach(s=>{cx.globalAlpha=.4+s.s/4;cx.fillRect(s.x,s.y,s.s,s.s)});cx.globalAlpha=1;
+  if(!g)return;
+  cx.textAlign="center";cx.textBaseline="middle";
+  g.b.forEach(b=>{cx.fillStyle=LC[b.c];cx.strokeStyle="#fff";cx.lineWidth=2.5;cx.beginPath();cx.roundRect(b.x-70,b.y-37,140,74,20);cx.fill();cx.stroke();cx.fillStyle="#fff";cx.font="bold 16px system-ui,sans-serif";wrap(b.t,b.x,b.y,122,19)});
+  if(mode==="play"){cx.font="46px serif";cx.save();cx.translate(g.x,g.y);if(SK[S.skin]==="🚀")cx.rotate(-Math.PI/4);cx.fillText(SK[S.skin],0,0);cx.restore()}
+  parts.forEach(p=>{cx.globalAlpha=Math.max(p.l,0);cx.fillStyle=p.c;if(p.t){cx.font="bold 26px system-ui,sans-serif";cx.fillText(p.t,p.x,p.y)}else{cx.beginPath();cx.arc(p.x,p.y,4,0,7);cx.fill()}});cx.globalAlpha=1;
+  cx.fillStyle="rgba(2,6,23,.75)";cx.strokeStyle="#22d3ee";cx.lineWidth=2;cx.beginPath();cx.roundRect(10,8,W-20,92,16);cx.fill();cx.stroke();
+  const t=TN[g.cur[0]];cx.fillStyle="#7dd3fc";cx.font="13px system-ui,sans-serif";cx.fillText(t[0]+" "+t[1]+"  ·  Doğru "+g.ok+"/50",W/2,24);
+  cx.fillStyle="#fff";cx.font="bold 20px system-ui,sans-serif";wrap(g.cur[1],W/2,63,430,25);
+  cx.font="bold 17px system-ui,sans-serif";cx.textAlign="left";cx.fillText("⭐ "+g.score,16,124);cx.textAlign="center";cx.fillText(g.streak>=3?"🔥 x"+(1+Math.floor(g.streak/3))+" seri "+g.streak:"Seri: "+g.streak,W/2,124);cx.textAlign="right";cx.fillText("❤️".repeat(Math.max(g.hp,0)),W-16,124)}
+/* ===== MÜZİK: kodla üretilen, org benzeri pad + arpej ===== */
+const CH=[[110,164.81,220,261.63,329.63],[87.31,130.81,174.61,220,261.63],[130.81,196,261.63,329.63,392],[98,146.83,196,246.94,293.66]];
+let mOn=false,mg,pm,nextC=0,nextA=0,ci=0,ai=0,cl=[];
+function pad(f5,t){const c=ac;f5.forEach(f=>[-6,6].forEach(dt=>{const o=c.createOscillator(),fl=c.createBiquadFilter(),v=c.createGain();o.type="sawtooth";o.frequency.value=f;o.detune.value=dt;fl.type="lowpass";fl.frequency.value=600;v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(.016,t+1);v.gain.setValueAtTime(.016,t+4);v.gain.linearRampToValueAtTime(0,t+6.5);o.connect(fl);fl.connect(v);v.connect(mg);o.start(t);o.stop(t+6.6)}))}
+function tone(f,t){const c=ac,o=c.createOscillator(),v=c.createGain();o.type="sine";o.frequency.value=f;v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(.05,t+.02);v.gain.exponentialRampToValueAtTime(.001,t+1.5);o.connect(v);v.connect(mg);o.start(t);o.stop(t+1.6)}
+function bass(f,t){const c=ac,o=c.createOscillator(),fl=c.createBiquadFilter(),v=c.createGain();o.type="sawtooth";o.frequency.value=f;fl.type="lowpass";fl.frequency.value=380;v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(.1,t+.01);v.gain.exponentialRampToValueAtTime(.001,t+.4);o.connect(fl);fl.connect(v);v.connect(mg);o.start(t);o.stop(t+.45)}
+function kick(t){const c=ac,o=c.createOscillator(),v=c.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(40,t+.12);v.gain.setValueAtTime(.3,t);v.gain.exponentialRampToValueAtTime(.001,t+.22);o.connect(v);v.connect(pm);o.start(t);o.stop(t+.25)}
+let NB;function hat(t){const c=ac;if(!NB){NB=c.createBuffer(1,c.sampleRate*.1,c.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}const s=c.createBufferSource(),hp=c.createBiquadFilter(),v=c.createGain();s.buffer=NB;hp.type="highpass";hp.frequency.value=7000;v.gain.setValueAtTime(.05,t);v.gain.exponentialRampToValueAtTime(.001,t+.06);s.connect(hp);hp.connect(v);v.connect(pm);s.start(t)}
+function sched(){const c=ac,t=c.currentTime;if(nextC<t-1)nextC=t+.1;if(nextA<t-1)nextA=t+.1;
+  while(nextC<t+1){cl.push({t:nextC,k:ci%4});if(cl.length>4)cl.shift();pad(CH[ci%4],nextC);ci++;nextC+=4}
+  while(nextA<t+1){let k=0;cl.forEach(x=>{if(x.t<=nextA)k=x.k});if(ai%2===0){bass(CH[k][0],nextA);kick(nextA)}else hat(nextA);tone(CH[k][[2,3,4,3,2,3,4,3][ai%8]]*2,nextA);ai++;nextA+=.25}}
+function startMusic(){if(mOn)return;try{ac=ac||new AudioContext();if(ac.state==="suspended")ac.resume();const c=ac,rv=c.createConvolver(),wet=c.createGain(),n=c.sampleRate*3,b=c.createBuffer(2,n,c.sampleRate);
+  for(let k=0;k<2;k++){const d=b.getChannelData(k);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.5)}
+  rv.buffer=b;wet.gain.value=.7;mg=c.createGain();mg.gain.value=S.mute?0:.9;mg.connect(c.destination);mg.connect(rv);pm=c.createGain();pm.gain.value=S.mute?0:.9;pm.connect(c.destination);const dl=c.createDelay(),fb=c.createGain();dl.delayTime.value=.375;fb.gain.value=.3;mg.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(c.destination);rv.connect(wet);wet.connect(c.destination);
+  nextC=c.currentTime+.1;nextA=nextC+3;mOn=true;sched();setInterval(sched,200)}catch(e){}}
+$("#mu").textContent=S.mute?"🔇":"🔊";
+$("#mu").onclick=()=>{S.mute=!S.mute;save();$("#mu").textContent=S.mute?"🔇":"🔊";startMusic();if(mg){mg.gain.setTargetAtTime(S.mute?0:.9,ac.currentTime,.1);pm.gain.setTargetAtTime(S.mute?0:.9,ac.currentTime,.1)}};
+let last=performance.now();
+function loop(n){const dt=Math.min((n-last)/1000,.05);last=n;update(dt);draw();requestAnimationFrame(loop)}
+menu();requestAnimationFrame(loop);
+</script>
+</body>
+</html>

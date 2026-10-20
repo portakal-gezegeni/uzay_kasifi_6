@@ -108,8 +108,8 @@ const NEW=`0|Güneş sisteminin merkezinde ne vardır?|Güneş|Dünya|Jüpiter|A
 4|Sürat formülü hangisidir?|Yol ÷ zaman|Yol × zaman|Zaman ÷ yol|Yol + zaman|Sürat = yol ÷ zaman.
 4|240 km yolu 3 saatte giden aracın sürati nedir?|80 km/sa|720 km/sa|60 km/sa|243 km/sa|240 ÷ 3 = 80 km/sa.
 4|Sürat birimi hangisidir?|m/s|kg|N|L|Sürat birimi m/s ya da km/sa’tir.
-4|1 m/s kaç km/sa’tir?|3,6|36|0,36|60|1 m/s = 3,6 km/sa.
-4|72 km/sa kaç m/s’dir?|20|72|200|7,2|72 ÷ 3,6 = 20 m/s.
+4|Hangisi hem büyüklük hem yön içerir?|Hız|Sürat|Alınan yol|Zaman|Hız yönlü bir büyüklüktür.
+4|60 km yolu 2 saatte giden aracın sürati nedir?|30 km/sa|120 km/sa|62 km/sa|58 km/sa|60 ÷ 2 = 30 km/sa.
 4|Hangisi bir hız örneğidir?|30 m/s batıya|30 m/s|30 m|30 s|Hız yön içerir.
 4|Hangisi bir sürat örneğidir?|50 km/sa|50 km/sa doğuya|50 km doğuya|50 sa|Sürat yön içermez.
 4|Yer değiştirme nedir?|Başlangıçtan bitişe yönlü düz uzaklık|Gidilen toplam yol|Geçen zaman|Kütle|Yer değiştirme yönlüdür.
@@ -117,7 +117,7 @@ const NEW=`0|Güneş sisteminin merkezinde ne vardır?|Güneş|Dünya|Jüpiter|A
 4|Pistte tam tur koşan çocuğun yer değiştirmesi nedir?|0|Pist uzunluğu|Yarıçapı|Sonsuz|Başladığı yere döndüğü için 0’dır.
 4|Yönü değişen ama sürati sabit olan cismin hızı?|Değişir|Değişmez|Sıfırdır|Sürat artar|Yön değişince hız değişir.
 4|20 m/s süratle 5 saniye giden cismin aldığı yol?|100 m|4 m|25 m|15 m|20 × 5 = 100 m.
-4|Hangisi daha süratlidir?|90 km/sa|20 m/s|60 km/sa|10 m/s|20 m/s = 72 km/sa; 90 km/sa daha büyüktür.
+4|Aynı sürede daha çok yol alan cisim için ne söylenir?|Daha süratlidir|Daha yavaştır|Sürati aynıdır|Hızı yoktur|Aynı sürede çok yol alan daha süratlidir.
 5|Sabit süratli hareket nedir?|Eşit zamanda eşit yol alma|Hızlanma|Yavaşlama|Durma|Eşit sürelerde eşit yol alınır.
 5|4 m/s sabit süratle giden cisim 3 saniyede kaç m yol alır?|12 m|7 m|1,3 m|43 m|4 × 3 = 12 m.
 5|Sabit süratte yol formülü hangisidir?|Yol = sürat × zaman|Yol = sürat ÷ zaman|Yol = sürat + zaman|Yol = sürat − zaman|Yol = sürat × zaman.
@@ -147,7 +147,7 @@ const beep=(f,d,t)=>{try{ac=ac||new AudioContext();const o=ac.createOscillator()
 const ov=h=>{$("#ov").innerHTML=h;$("#ov").style.display=h?"flex":"none"};
 const fit=()=>{$("#app").style.fontSize=$("#app").clientWidth/480*16+"px"};addEventListener("resize",fit);fit();
 
-function menu(){mode="menu";g=null;ov(`<div class="card"><h1>🚀 Uzay Kaşifi</h1><p><b>6. Sınıf Fen Bilimleri</b></p><p>Roketi parmağınla <b>sağa sola kaydır</b> ya da bir cevaba <b>dokun</b>: roket uçup o cevabı seçsin. Fareyle ya da ok tuşlarıyla da oynayabilirsin.</p><p>🪐 🌑 ➡️ ⚖️ 🧭 📈<br><small>50 doğru cevap ver, Uzay Kaşifi ol!<br>3 canın var, her 10 doğruda +1 can (en fazla 3).</small></p><button class="b" id="go">▶ Oyna</button><div class="sk">${SK.map((e,i)=>`<button data-i="${i}" class="${S.skin===i?"on":""}" ${S.total<SKP[i]?"disabled":""}>${S.total<SKP[i]?"🔒<br>"+SKP[i]:e}</button>`).join("")}</div><small>Roket seç · 🔒 toplam puanla açılır<br>En yüksek: ${S.best} · Toplam puan: ${S.total}<br>sürüm 4</small></div>`);
+function menu(){mode="menu";g=null;ov(`<div class="card"><h1>🚀 Uzay Kaşifi</h1><p><b>6. Sınıf Fen Bilimleri</b></p><p>Roketi parmağınla <b>sağa sola kaydır</b> ya da bir cevaba <b>dokun</b>: roket uçup o cevabı seçsin. Fareyle ya da ok tuşlarıyla da oynayabilirsin.</p><p>🪐 🌑 ➡️ ⚖️ 🧭 📈<br><small>50 doğru cevap ver, Uzay Kaşifi ol!<br>3 canın var, her 10 doğruda +1 can (en fazla 3).</small></p><button class="b" id="go">▶ Oyna</button><div class="sk">${SK.map((e,i)=>`<button data-i="${i}" class="${S.skin===i?"on":""}" ${S.total<SKP[i]?"disabled":""}>${S.total<SKP[i]?"🔒<br>"+SKP[i]:e}</button>`).join("")}</div><small>Roket seç · 🔒 toplam puanla açılır<br>En yüksek: ${S.best} · Toplam puan: ${S.total}<br>sürüm 5</small></div>`);
   $("#go").onclick=newGame;document.querySelectorAll(".sk button").forEach(b=>b.onclick=()=>{S.skin=+b.dataset.i;save();menu()})}
 function newGame(){g={score:0,hp:3,streak:0,ans:0,wrong:[0,0,0,0,0,0,0],q:sh(Q.map((_,i)=>i)),ok:0,cur:null,b:[],x:W/2,y:H-80,pause:false};tx=W/2;ty=H-80;nextQ();mode="play";ov("");startMusic();beep(520,.1)}
 function nextQ(){if(!g.q.length){win();return}g.cur=Q[g.q.pop()];
@@ -184,7 +184,7 @@ function update(dt){
   if(g.tgt&&g.b.includes(g.tgt)){tx=g.tgt.x;ty=g.tgt.y}else{g.tgt=null;ty=H-80}
   g.x+=(tx-g.x)*Math.min(1,dt*14);g.y+=(ty-g.y)*Math.min(1,dt*14);
   if(Math.random()<.6)parts.push({x:g.x+(Math.random()-.5)*10,y:g.y+25,vx:(Math.random()-.5)*30,vy:130,l:.3,c:"#fb923c"});
-  const sp=Math.min(34+g.ans*.5,50);
+  const sp=Math.min(28+g.ans*.4,40);
   for(const b of g.b)b.y+=sp*dt;
   const hit=g.tgt&&g.b.includes(g.tgt)?(Math.abs(g.tgt.x-g.x)<40&&Math.abs(g.tgt.y-g.y)<55?g.tgt:null):g.b.find(b=>Math.abs(b.x-g.x)<60&&Math.abs(b.y-g.y)<61);
   if(hit){resolve(hit.ok);return}

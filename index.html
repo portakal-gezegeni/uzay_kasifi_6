@@ -147,13 +147,13 @@ const beep=(f,d,t)=>{try{ac=ac||new AudioContext();const o=ac.createOscillator()
 const ov=h=>{$("#ov").innerHTML=h;$("#ov").style.display=h?"flex":"none"};
 const fit=()=>{$("#app").style.fontSize=$("#app").clientWidth/480*16+"px"};addEventListener("resize",fit);fit();
 
-function menu(){mode="menu";g=null;ov(`<div class="card"><h1>🚀 Uzay Kaşifi</h1><p><b>6. Sınıf Fen Bilimleri</b></p><p>Soruyu oku, <b>doğru cevabın gezegenine</b> uç!<br>Bir cevaba <b>dokun</b>, roket yukarı uçup o cevabı seçsin, sonra aşağı dönsün. Fareyle ya da sağ-sol ok tuşlarıyla da oynayabilirsin.</p><p>🪐 🌑 ➡️ ⚖️ 🧭 📈<br><small>50 doğru cevap ver, Uzay Kaşifi ol!<br>3 canın var, her 10 doğruda +1 can (en fazla 3).</small></p><button class="b" id="go">▶ Oyna</button><div class="sk">${SK.map((e,i)=>`<button data-i="${i}" class="${S.skin===i?"on":""}" ${S.total<SKP[i]?"disabled":""}>${S.total<SKP[i]?"🔒<br>"+SKP[i]:e}</button>`).join("")}</div><small>Roket seç · 🔒 toplam puanla açılır<br>En yüksek: ${S.best} · Toplam puan: ${S.total}</small></div>`);
+function menu(){mode="menu";g=null;ov(`<div class="card"><h1>🚀 Uzay Kaşifi</h1><p><b>6. Sınıf Fen Bilimleri</b></p><p>Parmağını (ya da fareni) sürükleyerek roketi her yöne hareket ettir; <b>doğru cevaba çarptır</b>. Hızlı cevap vermek için yukarı çıkıp cevaba kendin gidebilirsin. Ok tuşlarıyla da oynayabilirsin.</p><p>🪐 🌑 ➡️ ⚖️ 🧭 📈<br><small>50 doğru cevap ver, Uzay Kaşifi ol!<br>3 canın var, her 10 doğruda +1 can (en fazla 3).</small></p><button class="b" id="go">▶ Oyna</button><div class="sk">${SK.map((e,i)=>`<button data-i="${i}" class="${S.skin===i?"on":""}" ${S.total<SKP[i]?"disabled":""}>${S.total<SKP[i]?"🔒<br>"+SKP[i]:e}</button>`).join("")}</div><small>Roket seç · 🔒 toplam puanla açılır<br>En yüksek: ${S.best} · Toplam puan: ${S.total}</small></div>`);
   $("#go").onclick=newGame;document.querySelectorAll(".sk button").forEach(b=>b.onclick=()=>{S.skin=+b.dataset.i;save();menu()})}
 function newGame(){g={score:0,hp:3,streak:0,ans:0,wrong:[0,0,0,0,0,0,0],q:sh(Q.map((_,i)=>i)),ok:0,cur:null,b:[],x:W/2,y:H-80,pause:false};tx=W/2;ty=H-80;nextQ();mode="play";ov("");startMusic();beep(520,.1)}
 function nextQ(){if(!g.q.length){win();return}g.cur=Q[g.q.pop()];
   const o=sh([[g.cur[2],1],...sh(g.cur[3]).slice(0,2).map(t=>[t,0])]);g.b=o.map((a,i)=>({x:LX[i],y:190,t:a[0],ok:a[1],c:i}))}
 const burst=(x,y,c)=>{for(let i=0;i<18;i++)parts.push({x,y,vx:(Math.random()-.5)*320,vy:(Math.random()-.5)*320,l:.6,c})};
-function resolve(ok,late){g.tgt=null;ty=H-80;
+function resolve(ok,late){g.tgt=null;
   if(ok){g.streak++;g.ans++;g.ok++;if(g.ok%10===0&&g.hp<3)g.hp++;const m=1+Math.floor(g.streak/3);g.score+=10*m;burst(g.x,g.y-20,"#4ade80");parts.push({x:g.x,y:g.y-50,vx:0,vy:-60,l:.9,t:"+"+10*m,c:"#fde047"});beep(660,.1);setTimeout(()=>beep(880,.14),90);if(g.ok>=50)win();else nextQ()}
   else{g.hp--;g.streak=0;g.wrong[g.cur[0]]++;g.pause=true;g.b=[];burst(g.x,g.y-20,"#f87171");beep(150,.35,"sawtooth");
     const t=TN[g.cur[0]];ov(`<div class="card"><span class="chip">${t[0]} ${t[1]}</span><h1>${late?"⏰ Geç kaldın!":"❌ Olmadı!"}</h1><p>${g.cur[1]}</p><p class="big">Doğru cevap: <b>${g.cur[2]}</b></p><p>💡 ${g.cur[4]}</p><p>${"❤️".repeat(Math.max(g.hp,0))||"💔"}</p><button class="b" id="nx">${g.hp>0?"Devam ▶":"Bitir"}</button></div>`);
@@ -167,8 +167,9 @@ function end(){mode="over";const nb=g.score>S.best;if(nb)S.best=g.score;S.total+
   ov(`<div class="card"><h1>🌌 Oyun bitti</h1><p class="big">Puan: <b>${g.score}</b> ${nb?"🏆 Yeni rekor!":""}</p><p><small>En yüksek: ${S.best} · Doğru: ${g.ans}</small></p><div class="miss">${m.length?"<b>Biraz daha çalış:</b><br>"+m.map(x=>`${TN[x[1]][0]} ${TN[x[1]][1]} (${x[0]} yanlış)`).join("<br>"):"🎉 Hiç yanlışın yok!"}</div><button class="b" id="again">Tekrar oyna</button><button class="b" id="mn" style="background:#334155;color:#fff">Menü</button></div>`);
   $("#again").onclick=newGame;$("#mn").onclick=menu}
 
-const setT=e=>{const r=cv.getBoundingClientRect();tx=(e.clientX-r.left)/r.width*W};cv.addEventListener("pointermove",setT);
-cv.addEventListener("pointerdown",e=>{setT(e);if(g&&mode==="play"&&!g.pause&&g.b.length){g.tgt=g.b.reduce((a,b)=>Math.abs(b.x-tx)<Math.abs(a.x-tx)?b:a)}});
+const setT=e=>{const r=cv.getBoundingClientRect();tx=(e.clientX-r.left)/r.width*W;ty=(e.clientY-r.top)/r.height*H-(e.pointerType==="touch"?70:0)};
+cv.addEventListener("pointermove",setT);
+cv.addEventListener("pointerdown",e=>{try{cv.setPointerCapture(e.pointerId)}catch(_){}setT(e)});
 addEventListener("keydown",e=>keys[e.key.toLowerCase()]=1);addEventListener("keyup",e=>keys[e.key.toLowerCase()]=0);
 
 function wrap(t,x,y,mw,lh){const w=t.split(" ");let l="",ls=[];w.forEach(s=>{const n=l?l+" "+s:s;if(cx.measureText(n).width>mw&&l){ls.push(l);l=s}else l=n});ls.push(l);const y0=y-(ls.length-1)*lh/2;ls.forEach((s,i)=>cx.fillText(s,x,y0+i*lh))}
@@ -177,11 +178,11 @@ function update(dt){
   parts.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.l-=dt});parts=parts.filter(p=>p.l>0);
   if(mode!=="play"||g.pause)return;
   if(keys.arrowleft||keys.a)tx-=420*dt;if(keys.arrowright||keys.d)tx+=420*dt;tx=Math.max(40,Math.min(W-40,tx));
-  if(g.tgt&&g.b.includes(g.tgt)){tx=g.tgt.x;ty=g.tgt.y}else{g.tgt=null;ty=H-80}
+  if(keys.arrowup||keys.w)ty-=420*dt;if(keys.arrowdown||keys.s)ty+=420*dt;ty=Math.max(200,Math.min(H-60,ty));
   g.x+=(tx-g.x)*Math.min(1,dt*14);g.y+=(ty-g.y)*Math.min(1,dt*14);
   if(Math.random()<.6)parts.push({x:g.x+(Math.random()-.5)*10,y:g.y+25,vx:(Math.random()-.5)*30,vy:130,l:.3,c:"#fb923c"});
   const sp=Math.min(34+g.ans*.5,50);
-  for(const b of g.b){b.y+=sp*dt;if(Math.abs(b.x-g.x)<92&&Math.abs(b.y-g.y)<61){resolve(b.ok);return}}
+  for(const b of g.b){b.y+=sp*dt;if(Math.abs(b.x-g.x)<74&&Math.abs(b.y-g.y)<61){resolve(b.ok);return}}
   if(g.b[0]&&g.b[0].y>H+45){if(g.b.some(b=>b.ok))resolve(false,true)}}
 function draw(){
   const tc=g&&mode!=="menu"?TN[g.cur[0]][2]:"#1e1b4b",gr=cx.createLinearGradient(0,0,0,H);gr.addColorStop(0,tc);gr.addColorStop(1,"#020617");cx.fillStyle=gr;cx.fillRect(0,0,W,H);

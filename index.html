@@ -147,7 +147,7 @@ const beep=(f,d,t)=>{try{ac=ac||new AudioContext();const o=ac.createOscillator()
 const ov=h=>{$("#ov").innerHTML=h;$("#ov").style.display=h?"flex":"none"};
 const fit=()=>{$("#app").style.fontSize=$("#app").clientWidth/480*16+"px"};addEventListener("resize",fit);fit();
 
-function menu(){mode="menu";g=null;ov(`<div class="card"><h1>🚀 Uzay Kaşifi</h1><p><b>6. Sınıf Fen Bilimleri</b></p><p>Parmağını (ya da fareni) sürükleyerek roketi her yöne hareket ettir; <b>doğru cevaba çarptır</b>. Hızlı cevap vermek için yukarı çıkıp cevaba kendin gidebilirsin. Ok tuşlarıyla da oynayabilirsin.</p><p>🪐 🌑 ➡️ ⚖️ 🧭 📈<br><small>50 doğru cevap ver, Uzay Kaşifi ol!<br>3 canın var, her 10 doğruda +1 can (en fazla 3).</small></p><button class="b" id="go">▶ Oyna</button><div class="sk">${SK.map((e,i)=>`<button data-i="${i}" class="${S.skin===i?"on":""}" ${S.total<SKP[i]?"disabled":""}>${S.total<SKP[i]?"🔒<br>"+SKP[i]:e}</button>`).join("")}</div><small>Roket seç · 🔒 toplam puanla açılır<br>En yüksek: ${S.best} · Toplam puan: ${S.total}</small></div>`);
+function menu(){mode="menu";g=null;ov(`<div class="card"><h1>🚀 Uzay Kaşifi</h1><p><b>6. Sınıf Fen Bilimleri</b></p><p>Parmağını (ya da fareni) sürükleyerek roketi her yöne hareket ettir; <b>doğru cevaba çarptır</b>. Hızlı cevap vermek için yukarı çıkıp cevaba kendin gidebilirsin. Ok tuşlarıyla da oynayabilirsin.</p><p>🪐 🌑 ➡️ ⚖️ 🧭 📈<br><small>50 doğru cevap ver, Uzay Kaşifi ol!<br>3 canın var, her 10 doğruda +1 can (en fazla 3).</small></p><button class="b" id="go">▶ Oyna</button><div class="sk">${SK.map((e,i)=>`<button data-i="${i}" class="${S.skin===i?"on":""}" ${S.total<SKP[i]?"disabled":""}>${S.total<SKP[i]?"🔒<br>"+SKP[i]:e}</button>`).join("")}</div><small>Roket seç · 🔒 toplam puanla açılır<br>En yüksek: ${S.best} · Toplam puan: ${S.total}<br>sürüm 3</small></div>`);
   $("#go").onclick=newGame;document.querySelectorAll(".sk button").forEach(b=>b.onclick=()=>{S.skin=+b.dataset.i;save();menu()})}
 function newGame(){g={score:0,hp:3,streak:0,ans:0,wrong:[0,0,0,0,0,0,0],q:sh(Q.map((_,i)=>i)),ok:0,cur:null,b:[],x:W/2,y:H-80,pause:false};tx=W/2;ty=H-80;nextQ();mode="play";ov("");startMusic();beep(520,.1)}
 function nextQ(){if(!g.q.length){win();return}g.cur=Q[g.q.pop()];
@@ -170,6 +170,8 @@ function end(){mode="over";const nb=g.score>S.best;if(nb)S.best=g.score;S.total+
 const setT=e=>{const r=cv.getBoundingClientRect();tx=(e.clientX-r.left)/r.width*W;ty=(e.clientY-r.top)/r.height*H-(e.pointerType==="touch"?70:0)};
 cv.addEventListener("pointermove",setT);
 cv.addEventListener("pointerdown",e=>{try{cv.setPointerCapture(e.pointerId)}catch(_){}setT(e)});
+const tT=e=>{const t=e.touches[0];if(!t)return;e.preventDefault();const r=cv.getBoundingClientRect();tx=(t.clientX-r.left)/r.width*W;ty=(t.clientY-r.top)/r.height*H-70};
+["touchstart","touchmove"].forEach(n=>cv.addEventListener(n,tT,{passive:false}));
 addEventListener("keydown",e=>keys[e.key.toLowerCase()]=1);addEventListener("keyup",e=>keys[e.key.toLowerCase()]=0);
 
 function wrap(t,x,y,mw,lh){const w=t.split(" ");let l="",ls=[];w.forEach(s=>{const n=l?l+" "+s:s;if(cx.measureText(n).width>mw&&l){ls.push(l);l=s}else l=n});ls.push(l);const y0=y-(ls.length-1)*lh/2;ls.forEach((s,i)=>cx.fillText(s,x,y0+i*lh))}
